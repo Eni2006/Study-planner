@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Study Planner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f7f7f7;
+    }
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    nav {
+      background: #333;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+    }
+    section {
+      padding: 20px;
+      margin: 10px;
+      background: white;
+      border-radius: 5px;
+    }
+    input, select, textarea, button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      max-width: 400px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #efefef;
+      padding: 10px;
+      margin-bottom: 5px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>AI-Powered Study Planner</h1>
+    <p>Organize your learning, track your goals, and succeed!</p>
+  </header>
+
+  <nav>
+    <a href="#profile">Profile</a>
+    <a href="#subjects">Subjects</a>
+    <a href="#materials">Materials</a>
+    <a href="#notes">Notes</a>
+    <a href="#assessments">Assessments</a>
+    <a href="#results">Results</a>
+    <a href="#performance">Performance</a>
+  </nav>
+
+  <!-- Student Profile -->
+  <section id="profile">
+    <h2>Student Profile</h2>
+    <input type="text" id="studentName" placeholder="Name">
+    <input type="date" id="dob" placeholder="Date of Birth">
+    <input type="email" id="email" placeholder="Email">
+    <button onclick="saveProfile()">Save Profile</button>
+    <p id="profileOutput"></p>
+  </section>
+
+  <!-- Subjects -->
+  <section id="subjects">
+    <h2>Subjects</h2>
+    <input type="text" id="subjectInput" placeholder="Enter subject">
+    <button onclick="addSubject()">Add Subject</button>
+    <ul id="subjectList"></ul>
+  </section>
+
+  <!-- Materials Upload -->
+  <section id="materials">
+    <h2>Upload Materials</h2>
+    <select id="materialSubject"></select>
+    <input type="file" id="materialFile">
+    <button onclick="uploadMaterial()">Upload</button>
+    <ul id="materialList"></ul>
+  </section>
+
+  <!-- Lecture Notes -->
+  <section id="notes">
+    <h2>Lecture Notes</h2>
+    <input type="text" id="noteTopic" placeholder="Enter Topic">
+    <textarea id="noteArea" rows="5" placeholder="Write or paste lecture notes here..."></textarea>
+    <button onclick="saveNotes()">Save Notes</button>
+    <ul id="noteList"></ul>
+  </section>
+
+  <!-- Assessments -->
+  <section id="assessments">
+    <h2>Assessments</h2>
+    <input type="text" id="assessmentName" placeholder="Assessment Name">
+    <input type="date" id="assessmentDate">
+    <button onclick="addAssessment()">Add Assessment</button>
+    <ul id="assessmentList"></ul>
+  </section>
+
+  <!-- Results -->
+  <section id="results">
+    <h2>Results</h2>
+    <select id="resultAssessment"></select>
+    <input type="number" id="resultScore" placeholder="Score (0-100)">
+    <button onclick="addResult()">Submit Result</button>
+    <ul id="resultList"></ul>
+  </section>
+
+  <!-- Performance Chart -->
+  <section id="performance">
+    <h2>Performance Chart</h2>
+    <canvas id="chartCanvas" width="400" height="200"></canvas>
+  </section>
+
+  <!-- Script -->
+  <script>
+    const subjects = [];
+    const materials = [];
+    const notes = [];
+    const assessments = [];
+    const results = [];
+
+    function saveProfile() {
+      const name = document.getElementById("studentName").value;
+      const dob = document.getElementById("dob").value;
+      const email = document.getElementById("email").value;
+      document.getElementById("profileOutput").textContent = `Saved Profile: ${name}, ${dob}, ${email}`;
+    }
+
+    function addSubject() {
+      const subject = document.getElementById("subjectInput").value;
+      if (subject) {
+        subjects.push(subject);
+        updateSubjectList();
+        updateSubjectDropdowns();
+        document.getElementById("subjectInput").value = '';
+      }
+    }
+
+    function updateSubjectList() {
+      const list = document.getElementById("subjectList");
+      list.innerHTML = '';
+      subjects.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        list.appendChild(li);
+      });
+    }
+
+    function updateSubjectDropdowns() {
+      const dropdowns = [document.getElementById("materialSubject")];
+      dropdowns.forEach(drop => {
+        drop.innerHTML = '';
+        subjects.forEach(sub => {
+          const opt = document.createElement("option");
+          opt.text = sub;
+          drop.add(opt);
+        });
+      });
+    }
+
+    function uploadMaterial() {
+      const subject = document.getElementById("materialSubject").value;
+      const file = document.getElementById("materialFile").files[0];
+      if (subject && file) {
+        materials.push({ subject, name: file.name });
+        updateMaterialList();
+        document.getElementById("materialFile").value = '';
+      }
+    }
+
+    function updateMaterialList() {
+      const list = document.getElementById("materialList");
+      list.innerHTML = '';
+      materials.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = `${m.subject} - ${m.name}`;
+        list.appendChild(li);
+      });
+    }
+
+    function saveNotes() {
+      const topic = document.getElementById("noteTopic").value;
+      const content = document.getElementById("noteArea").value;
+      if (topic && content) {
+        notes.push({ topic, content });
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${topic}:</strong> ${content}`;
+        document.getElementById("noteList").appendChild(li);
+        document.getElementById("noteTopic").value = '';
+        document.getElementById("noteArea").value = '';
+      }
+    }
+
+    function addAssessment() {
+      const name = document.getElementById("assessmentName").value;
+      const date = document.getElementById("assessmentDate").value;
+      if (name && date) {
+        assessments.push({ name, date });
+        const li = document.createElement("li");
+        li.textContent = `${name} - ${date}`;
+        document.getElementById("assessmentList").appendChild(li);
+        const opt = document.createElement("option");
+        opt.text = name;
+        document.getElementById("resultAssessment").appendChild(opt);
+      }
+    }
+
+    function addResult() {
+      const name = document.getElementById("resultAssessment").value;
+      const score = parseFloat(document.getElementById("resultScore").value);
+      if (name && !isNaN(score)) {
+        results.push({ name, score });
+        const li = document.createElement("li");
+        li.textContent = `${name} - ${score}%`;
+        document.getElementById("resultList").appendChild(li);
+        drawChart();
+      }
+    }
+
+    function drawChart() {
+      const ctx = document.getElementById('chartCanvas').getContext('2d');
+      const labels = results.map(r => r.name);
+      const data = results.map(r => r.score);
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Score (%)',
+            data: data,
+            backgroundColor: '#4a90e2'
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true, max: 100 }
+          }
+        }
+      });
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
+# Study-planner
